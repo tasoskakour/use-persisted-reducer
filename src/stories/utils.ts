@@ -21,6 +21,8 @@ export const INITIAL_STATE = {
 	timestamp: Date.now(),
 };
 
+export const INITIAL_ARG = 1234;
+
 export const reducer = (state: State, action: Action): State => {
 	const { type } = action;
 
