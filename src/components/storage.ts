@@ -3,7 +3,14 @@ export type ItemWithExpiry = {
 	expiresAt?: string;
 };
 
-const createStorage = (key: string, provider: Storage, ttl?: number) => ({
+export type IStorage = {
+	provider: Storage;
+	set: (value: any) => void;
+	get: (fallbackValue?: any) => { value: any; isExpired: boolean };
+};
+
+const createStorage = (key: string, provider: Storage, ttl?: number): IStorage => ({
+	provider,
 	set: (value: any) => {
 		const item: ItemWithExpiry = {
 			value,
@@ -13,24 +20,21 @@ const createStorage = (key: string, provider: Storage, ttl?: number) => ({
 		}
 		provider.setItem(key, JSON.stringify(item));
 	},
-	get: (fallbackValue: any) => {
+	get: () => {
 		const item = provider.getItem(key);
-		if (!item) return fallbackValue; // Item not in storage
+		if (!item) return { value: null, isExpired: false };
 
 		try {
 			const parsed = JSON.parse(item) as ItemWithExpiry;
 			const { expiresAt, value } = parsed || {};
 			if (expiresAt && new Date(expiresAt).getTime() <= Date.now()) {
-				// expired, remove from store
-				console.log('EXPIRED');
-				provider.removeItem(key);
-				return fallbackValue;
+				return { value, isExpired: true };
 			}
 
-			return value;
+			return { value, isExpired: false };
 		} catch (error) {
 			console.error(error);
-			return fallbackValue;
+			return { value: null, isExpired: false };
 		}
 	},
 });
