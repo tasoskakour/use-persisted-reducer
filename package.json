@@ -23,10 +23,11 @@
   "module": "dist/esm/index.js",
   "scripts": {
     "build": "rollup -c",
-    "test": "npm run lint && jest --coverage",
+    "test": "npm run lint && start-server-and-test storybook-ci :6006 jest",
     "lint": "eslint . --cache",
     "prepare": "husky install",
     "storybook": "start-storybook -p 6006",
+    "storybook-ci": "start-storybook --ci -p 6006",
     "build-storybook": "build-storybook"
   },
   "browserslist": {
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
+    "@babel/plugin-transform-runtime": "^7.17.0",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
@@ -64,7 +66,6 @@
     "@storybook/manager-webpack5": "^6.4.19",
     "@storybook/react": "^6.1.21",
     "@storybook/testing-library": "^0.0.9",
-    "@testing-library/react": "12.1.2",
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.21",
     "@types/react": "^17.0.39",
@@ -75,13 +76,16 @@
     "eslint-config-tasoskakour-typescript-prettier": "^2.0.5",
     "husky": "^7.0.4",
     "jest": "^27.5.1",
+    "jest-puppeteer": "^6.1.0",
     "lint-staged": "^12.3.5",
+    "puppeteer": "^13.5.1",
     "react-dom": "^17.0.2",
     "rollup": "^2.69.2",
     "rollup-plugin-dts": "^4.2.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-terser": "^7.0.2",
     "source-map-explorer": "^2.5.2",
+    "start-server-and-test": "^1.14.0",
     "ts-jest": "^27.1.3",
     "typescript": "^4.6.2"
   },
