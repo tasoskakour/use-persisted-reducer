@@ -9,16 +9,16 @@ type Props = {
 const Component = (props: Props) => {
 	const { state, dispatch } = props;
 
-	const { counter, timestamp } = state || {};
+	const { counter, biggerCounter } = state || {};
 
 	return (
 		<div>
-			Counter: {counter}
+			<span id="counter">{counter}</span>
 			<br />
-			Timestamp: {new Date(timestamp).toLocaleString()}
-			<br />
+			<span id="biggerCounter">{biggerCounter}</span>
 			<br />
 			<button
+				id="increase"
 				type="button"
 				style={{ margin: 8 }}
 				onClick={() => dispatch({ type: 'INCREASE' })}
@@ -26,26 +26,13 @@ const Component = (props: Props) => {
 				Increase
 			</button>
 			<button
+				id="decrease"
 				type="button"
 				style={{ margin: 8 }}
 				onClick={() => dispatch({ type: 'DECREASE' })}
 			>
 				Decrease
 			</button>
-			<button type="button" style={{ margin: 8 }} onClick={() => dispatch({ type: 'RESET' })}>
-				Reset
-			</button>
-			<div style={{ margin: 8 }}>
-				Set{' '}
-				<input
-					onChange={(event) =>
-						dispatch({
-							type: 'SET',
-							data: event.target.value.length === 0 ? 0 : Number(event.target.value),
-						})
-					}
-				/>
-			</div>
 		</div>
 	);
 };

@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/react';
 import { createPersistedReducer } from '../components';
-import { INITIAL_ARG, INITIAL_STATE, reducer } from './utils';
+import { INITIAL_COUNTER_ARG, INITIAL_BIGGER_COUNTER_ARG, INITIAL_STATE, reducer } from './utils';
 import Component from './Component';
 
 // First case
@@ -24,10 +24,15 @@ export const LocalStorageNoTTL = () => {
 // Third case
 const usePersistedReducer3 = createPersistedReducer('LocalStorageNoTTLWithInitFunction_test');
 export const LocalStorageNoTTLWithInitFunction = () => {
-	const [state, dispatch] = usePersistedReducer3(reducer, INITIAL_ARG, (initializerArg) => ({
-		counter: initializerArg,
-		timestamp: Date.now(),
-	}));
+	const [state, dispatch] = usePersistedReducer3(
+		reducer,
+		{ INITIAL_COUNTER_ARG, INITIAL_BIGGER_COUNTER_ARG },
+		// eslint-disable-next-line no-shadow
+		({ INITIAL_COUNTER_ARG, INITIAL_BIGGER_COUNTER_ARG }) => ({
+			counter: -INITIAL_COUNTER_ARG,
+			biggerCounter: -INITIAL_BIGGER_COUNTER_ARG,
+		})
+	);
 
 	return <Component state={state} dispatch={dispatch} />;
 };
@@ -44,10 +49,15 @@ const usePersistedReducer5 = createPersistedReducer('LocalStorageWithTTLWithInit
 	ttl: 10,
 });
 export const LocalStorageWithTTLWithInitFunction = () => {
-	const [state, dispatch] = usePersistedReducer5(reducer, INITIAL_ARG, (initializerArg) => ({
-		counter: initializerArg,
-		timestamp: Date.now(),
-	}));
+	const [state, dispatch] = usePersistedReducer5(
+		reducer,
+		{ INITIAL_COUNTER_ARG, INITIAL_BIGGER_COUNTER_ARG },
+		// eslint-disable-next-line no-shadow
+		({ INITIAL_COUNTER_ARG, INITIAL_BIGGER_COUNTER_ARG }) => ({
+			counter: -INITIAL_COUNTER_ARG,
+			biggerCounter: -INITIAL_BIGGER_COUNTER_ARG,
+		})
+	);
 
 	return <Component state={state} dispatch={dispatch} />;
 };

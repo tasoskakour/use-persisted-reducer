@@ -4,24 +4,20 @@ export type Action =
 	  }
 	| {
 			type: 'DECREASE';
-	  }
-	| {
-			type: 'SET';
-			data: number;
-	  }
-	| { type: 'RESET' };
+	  };
 
 export type State = {
 	counter: number;
-	timestamp: number;
+	biggerCounter: number;
 };
 
 export const INITIAL_STATE = {
 	counter: 0,
-	timestamp: Date.now(),
+	biggerCounter: 10,
 };
 
-export const INITIAL_ARG = 1234;
+export const INITIAL_COUNTER_ARG = 0;
+export const INITIAL_BIGGER_COUNTER_ARG = 10;
 
 export const reducer = (state: State, action: Action): State => {
 	const { type } = action;
@@ -31,25 +27,13 @@ export const reducer = (state: State, action: Action): State => {
 			return {
 				...state,
 				counter: state.counter + 1,
-				timestamp: Date.now(),
+				biggerCounter: state.biggerCounter + 1,
 			};
 		case 'DECREASE':
 			return {
 				...state,
-				counter: state.counter - 1,
-				timestamp: Date.now(),
-			};
-		case 'SET':
-			return {
-				...state,
-				// eslint-disable-next-line unicorn/consistent-destructuring
-				counter: action.data,
-				timestamp: Date.now(),
-			};
-		case 'RESET':
-			return {
-				...state,
-				...INITIAL_STATE,
+				counter: state.counter + 1,
+				biggerCounter: state.biggerCounter + 1,
 			};
 
 		default:
