@@ -142,7 +142,7 @@ const usePersistedReducer = <S, A, I = S>(
 	return [state, dispatch, isExpiredInitialRef.current];
 };
 
-type IOverload = {
+export type IOverload = {
 	<S, A>(reducer: Reducer<S, A>, initializerArg: S): HookReturn<S, A>;
 	<S, A, I>(
 		reducer: Reducer<S, A>,
