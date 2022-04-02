@@ -3,8 +3,15 @@ import { getTextContent } from './utils';
 
 const URL = 'http://localhost:6006/iframe.html?id=use-persisted-reducer--session-storage';
 
+let browser: puppeteer.Browser;
+afterAll((done) => {
+	browser.close();
+
+	done();
+});
+
 test('Session storage works OK', async () => {
-	const browser = await puppeteer.launch();
+	browser = await puppeteer.launch();
 	const page = await browser.newPage();
 	await page.goto(URL);
 

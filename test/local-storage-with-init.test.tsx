@@ -4,8 +4,15 @@ import { getTextContent } from './utils';
 const URL =
 	'http://localhost:6006/iframe.html?id=use-persisted-reducer--local-storage-no-ttl-with-init-function';
 
+let browser: puppeteer.Browser;
+afterAll((done) => {
+	browser.close();
+
+	done();
+});
+
 test('Local storage with init function works OK', async () => {
-	const browser = await puppeteer.launch();
+	browser = await puppeteer.launch();
 	const tab1 = await browser.newPage();
 	await tab1.goto(URL);
 

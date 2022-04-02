@@ -5,8 +5,16 @@ import { getTextContent, mockDate } from './utils';
 const URL =
 	'http://localhost:6006/iframe.html?id=use-persisted-reducer--local-storage-with-ttl-with-init-function';
 
+let browser: puppeteer.Browser;
+afterAll((done) => {
+	browser.close();
+
+	done();
+});
+
 test('Local storage with init with TTL works OK', async () => {
-	const browser = await puppeteer.launch();
+	browser = await puppeteer.launch();
+
 	await mockDate(browser, new Date(2022, 3, 30, 16, 0, 0, 0));
 
 	// Open tab 1
