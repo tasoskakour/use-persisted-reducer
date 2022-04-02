@@ -11,7 +11,7 @@
     "typescript",
     "useReducer"
   ],
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Enhance useReducer with persistence to local/session storage (with ttl support).",
   "license": "MIT",
   "homepage": "https://github.com/tasoskakour/use-persisted-reducer#readme",
@@ -100,6 +100,6 @@
     "*.{js,ts,tsx}": "eslint --cache --fix"
   },
   "publishConfig": {
-		"access": "public"
-	}
+    "access": "public"
+  }
 }
