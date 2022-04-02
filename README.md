@@ -1,5 +1,8 @@
 # @tasoskakour/use-persisted-reducer
 
+![gh workflow](https://github.com/tasoskakour/use-persisted-reducer/actions/workflows/ci-cd.yml/badge.svg) 
+
+
 > A custom React hook that provides multi tab/browser persistent state. With TTL support.
 
 `use-persisted-reducer` is actually a function that accepts a `key`, an optional storage provider (defaults to `window.localStorage`) and an optional `ttl` parameter and returns a React hook with identical API as the classic _useReducer_.
