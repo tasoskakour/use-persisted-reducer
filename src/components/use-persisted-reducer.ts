@@ -14,6 +14,8 @@ import createStorage, { IStorage, ItemWithExpiry } from './storage';
 export type Options = {
 	storage?: Storage;
 	ttl?: number;
+	allowList?: string[];
+	denyList?: string[];
 };
 
 const SYNC_ACTION = '__USE_PERSISTED_REDUCER_SYNC_ACTION__';
@@ -58,8 +60,13 @@ const useSyncStorage = <S>(
 	key: string,
 	theStorage: IStorage,
 	isMountedRef: MutableRefObject<boolean>,
-	isUpdateFromListenerRef: MutableRefObject<boolean>
+	isUpdateFromListenerRef: MutableRefObject<boolean>,
+	allowList?: string[],
+	denyList?: string[]
 ) => {
+	const allowListRef = useRef(allowList);
+	const denyListRef = useRef(denyList);
+
 	useEffect(() => {
 		if (!isMountedRef.current) {
 			// eslint-disable-next-line no-param-reassign
@@ -73,7 +80,7 @@ const useSyncStorage = <S>(
 			return;
 		}
 
-		theStorage.set(state);
+		theStorage.set(state, allowListRef.current, denyListRef.current);
 	}, [state, key, theStorage, isMountedRef, isUpdateFromListenerRef]);
 };
 
@@ -124,7 +131,7 @@ const usePersistedReducer = <S, A, I = S>(
 	initializerArg: S | I,
 	initializer?: (initialiazerArg: I | S) => S
 ): HookReturn<S, A> => {
-	const { ttl, storage = window.localStorage } = options || {};
+	const { ttl, storage = window.localStorage, allowList, denyList } = options || {};
 	const isMountedRef = useRef(false);
 	const isUpdateFromListenerRef = useRef(false);
 	const theStorage = useMemo(() => createStorage(key, storage, ttl), [key, storage, ttl]);
@@ -135,7 +142,15 @@ const usePersistedReducer = <S, A, I = S>(
 		withInitState(theStorage, isExpiredInitialRef, initializer)
 	);
 
-	useSyncStorage<S>(state, key, theStorage, isMountedRef, isUpdateFromListenerRef);
+	useSyncStorage<S>(
+		state,
+		key,
+		theStorage,
+		isMountedRef,
+		isUpdateFromListenerRef,
+		allowList,
+		denyList
+	);
 
 	useStorageListener<A>(key, storage, isUpdateFromListenerRef, dispatch);
 

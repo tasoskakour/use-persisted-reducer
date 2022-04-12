@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-object-from-entries, unicorn/no-array-reduce  */
 export type ItemWithExpiry = {
 	value: any;
 	expiresAt?: string;
@@ -5,15 +6,37 @@ export type ItemWithExpiry = {
 
 export type IStorage = {
 	provider: Storage;
-	set: (value: any) => void;
+	set: (value: any, allowList?: string[], denyList?: string[]) => void;
 	get: (fallbackValue?: any) => { value: any; isExpired: boolean };
+};
+
+const allowOrDenyValues = (values: any, allowList?: string[], denyList?: string[]) => {
+	const action =
+		allowList && allowList.length > 0
+			? 'ALLOW'
+			: denyList && denyList.length > 0
+			? 'DENY'
+			: 'NOP';
+
+	if (action === 'NOP') return values;
+
+	return Object.fromEntries(values).reduce(
+		(accumulator: any, [key, value]: [string, any]) => ({
+			...accumulator,
+			...((action === 'ALLOW' && allowList?.includes(key)) ||
+			(action === 'DENY' && !denyList?.includes(key))
+				? { [key]: value }
+				: {}),
+		}),
+		{}
+	);
 };
 
 const createStorage = (key: string, provider: Storage, ttl?: number): IStorage => ({
 	provider,
-	set: (value: any) => {
+	set: (value: any, allowList?: string[], denyList?: string[]) => {
 		const item: ItemWithExpiry = {
-			value,
+			value: allowOrDenyValues(value, allowList, denyList),
 		};
 		if (ttl) {
 			item.expiresAt = new Date(Date.now() + ttl * 1000).toISOString();
