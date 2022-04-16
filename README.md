@@ -1,6 +1,6 @@
 # @tasoskakour/use-persisted-reducer
 
-![gh workflow]((https://img.shields.io/github/workflow/status/tasoskakour/react-use-oauth2/CI%20&%20CD)) [![npm](https://img.shields.io/npm/v/@tasoskakour/use-persisted-reducer.svg?style=svg&logo=npm&label=)](https://www.npmjs.com/package/@tasoskakour/use-persisted-reducer)
+![gh workflow](https://img.shields.io/github/workflow/status/tasoskakour/use-persisted-reducer/CI%20&%20CD) [![npm](https://img.shields.io/npm/v/@tasoskakour/use-persisted-reducer.svg?style=svg&logo=npm&label=)](https://www.npmjs.com/package/@tasoskakour/use-persisted-reducer)
 
 
 > A custom React hook that provides multi tab/browser persistent state. With TTL support.
