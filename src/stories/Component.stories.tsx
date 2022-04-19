@@ -7,10 +7,27 @@ import Component from './Component';
 const usePersistedReducer1 = createPersistedReducer('SessionStorage_test', {
 	storage: window.sessionStorage,
 });
-export const SessionStorage = () => {
+const Instance1 = () => {
 	const [state, dispatch] = usePersistedReducer1(reducer, INITIAL_STATE);
-
 	return <Component state={state} dispatch={dispatch} />;
+};
+const Instance2 = () => {
+	const [state, dispatch] = usePersistedReducer1(reducer, INITIAL_STATE);
+	return <Component state={state} dispatch={dispatch} />;
+};
+export const SessionStorage = () => {
+	return (
+		<>
+			<div id="instance1">
+				Instance 1: <Instance1 />
+			</div>
+
+			<hr />
+			<div id="instance2">
+				Instance 2: <Instance2 />
+			</div>
+		</>
+	);
 };
 
 // Second case

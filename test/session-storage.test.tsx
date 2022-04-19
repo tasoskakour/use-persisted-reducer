@@ -15,14 +15,16 @@ test('Session storage works OK', async () => {
 	const page = await browser.newPage();
 	await page.goto(URL);
 
-	expect(await getTextContent(page, '#counter')).toEqual('0');
-	expect(await getTextContent(page, '#biggerCounter')).toEqual('10');
+	expect(await getTextContent(page, '#instance1 #counter')).toEqual('0');
+	expect(await getTextContent(page, '#instance1 #biggerCounter')).toEqual('10');
 
 	await page.click('#increase');
 
 	const assess = async () => {
-		expect(await getTextContent(page, '#counter')).toEqual('1');
-		expect(await getTextContent(page, '#biggerCounter')).toEqual('11');
+		expect(await getTextContent(page, '#instance1 #counter')).toEqual('1');
+		expect(await getTextContent(page, '#instance1 #biggerCounter')).toEqual('11');
+		expect(await getTextContent(page, '#instance2 #counter')).toEqual('1');
+		expect(await getTextContent(page, '#instance2 #biggerCounter')).toEqual('11');
 		expect(
 			await page.evaluate(() => window.sessionStorage.getItem('SessionStorage_test'))
 		).toEqual(

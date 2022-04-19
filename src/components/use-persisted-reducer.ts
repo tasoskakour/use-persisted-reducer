@@ -2,36 +2,20 @@ import {
 	Dispatch,
 	MutableRefObject,
 	Reducer,
-	ReducerAction,
 	ReducerState,
+	useCallback,
 	useEffect,
 	useMemo,
-	useReducer,
 	useRef,
+	useState,
 } from 'react';
+import createGlobalState, { GlobalState } from './create-global-state';
 import createStorage, { IStorage, ItemWithExpiry } from './storage';
 
 export type Options = {
 	storage?: Storage;
 	ttl?: number;
 };
-
-const SYNC_ACTION = '__USE_PERSISTED_REDUCER_SYNC_ACTION__';
-
-const middleware =
-	<R extends Reducer<any, any>>(reducer: R) =>
-	(state: ReducerState<R>, action: ReducerAction<R>): ReducerState<R> => {
-		if (action?.type === SYNC_ACTION) {
-			try {
-				return action?.data;
-			} catch (error) {
-				console.error(error);
-				return state;
-			}
-		}
-
-		return reducer(state, action);
-	};
 
 const withInitState =
 	<R extends Reducer<any, any>>(
@@ -53,53 +37,16 @@ const withInitState =
 
 export type HookReturn<S, A> = [state: S, dispatch: Dispatch<A>, cacheMiss: boolean];
 
-const useSyncStorage = <S>(
-	state: S,
-	key: string,
-	theStorage: IStorage,
-	isMountedRef: MutableRefObject<boolean>,
-	isUpdateFromListenerRef: MutableRefObject<boolean>
-) => {
-	useEffect(() => {
-		if (!isMountedRef.current) {
-			// eslint-disable-next-line no-param-reassign
-			isMountedRef.current = true;
-			return;
-		}
-
-		if (isUpdateFromListenerRef.current) {
-			// eslint-disable-next-line no-param-reassign
-			isUpdateFromListenerRef.current = false;
-			return;
-		}
-
-		theStorage.set(state);
-	}, [state, key, theStorage, isMountedRef, isUpdateFromListenerRef]);
-};
-
-const useStorageListener = <A>(
-	key: string,
-	provider: Storage,
-	isUpdateFromListenerRef: MutableRefObject<boolean>,
-	dispatch: Dispatch<A>
-) => {
+const useStorageListener = (key: string, provider: Storage, setState: (newState: any) => void) => {
 	useEffect(() => {
 		const listener = (event: StorageEvent) => {
 			if (event.key === key) {
-				// eslint-disable-next-line no-param-reassign
-				isUpdateFromListenerRef.current = true;
 				if (!event.newValue) {
-					dispatch({
-						type: SYNC_ACTION,
-						data: null,
-					} as any);
+					setState(null);
 				} else {
 					try {
 						const parsed = JSON.parse(event.newValue) as ItemWithExpiry;
-						dispatch({
-							type: SYNC_ACTION,
-							data: parsed?.value,
-						} as any);
+						setState(parsed?.value);
 					} catch (error) {
 						console.error(error);
 					}
@@ -114,7 +61,20 @@ const useStorageListener = <A>(
 		return () => {
 			if (provider === window.localStorage) window.removeEventListener('storage', listener);
 		};
-	}, [key, provider, isUpdateFromListenerRef, dispatch]);
+	}, [key, provider, setState]);
+};
+
+const useGlobalStateRef = (key: string, setState: (newState: any) => void, initialState: any) => {
+	const globalStateRef = useRef<GlobalState | null>(null);
+	useEffect(() => {
+		globalStateRef.current = createGlobalState(key, setState, initialState);
+
+		return () => {
+			globalStateRef.current?.deregister();
+		};
+	}, [key, setState, initialState]);
+
+	return globalStateRef;
 };
 
 const usePersistedReducer = <S, A, I = S>(
@@ -125,21 +85,40 @@ const usePersistedReducer = <S, A, I = S>(
 	initializer?: (initialiazerArg: I | S) => S
 ): HookReturn<S, A> => {
 	const { ttl, storage = window.localStorage } = options || {};
-	const isMountedRef = useRef(false);
-	const isUpdateFromListenerRef = useRef(false);
+
 	const theStorage = useMemo(() => createStorage(key, storage, ttl), [key, storage, ttl]);
 	const isExpiredInitialRef = useRef(false);
-	const [state, dispatch] = useReducer(
-		middleware(reducer),
-		initializerArg,
-		withInitState(theStorage, isExpiredInitialRef, initializer)
+	const reducerRef = useRef(reducer);
+	const initializerArgRef = useRef(initializerArg);
+	const initialState = useMemo(
+		() =>
+			withInitState(theStorage, isExpiredInitialRef, initializer)(initializerArgRef.current),
+		[theStorage, isExpiredInitialRef, initializer]
 	);
 
-	useSyncStorage<S>(state, key, theStorage, isMountedRef, isUpdateFromListenerRef);
+	const [state, setState] = useState(initialState);
 
-	useStorageListener<A>(key, storage, isUpdateFromListenerRef, dispatch);
+	const globalStateRef = useGlobalStateRef(key, setState, initialState);
 
-	return [state, dispatch, isExpiredInitialRef.current];
+	const persistentDispatch = useCallback<Dispatch<A>>(
+		(action: A) => {
+			// Calculate new state
+			const newState = reducerRef.current(state, action);
+
+			// Save to storage
+			theStorage.set(newState);
+
+			// Apply state
+			setState(newState);
+
+			globalStateRef.current?.emit(newState);
+		},
+		[theStorage, globalStateRef, state, reducerRef]
+	);
+
+	useStorageListener(key, storage, setState);
+
+	return [state, persistentDispatch, isExpiredInitialRef.current];
 };
 
 export type IOverload = {
